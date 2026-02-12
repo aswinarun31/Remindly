@@ -86,7 +86,7 @@ const Reminders = () => {
                 <div className="flex items-center gap-2">
                   <SidebarTrigger className="lg:hidden" />
                   <div>
-                    <h1 className="text-2xl font-bold">Reminders</h1>
+                    <h1 className="text-2xl font-bold">View your Reminders</h1>
 
                   </div>
                 </div>

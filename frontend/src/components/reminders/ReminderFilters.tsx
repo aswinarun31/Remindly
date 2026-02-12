@@ -1,6 +1,7 @@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 
+
 interface ReminderFiltersProps {
   filters: { status: string; priority: string; category: string; date: string };
   onChange: (filters: { status: string; priority: string; category: string; date: string }) => void;
@@ -41,7 +42,10 @@ const ReminderFilters = ({ filters, onChange }: ReminderFiltersProps) => {
         </SelectContent>
       </Select>
       <Input type="date" className="w-[160px]" value={filters.date} onChange={(e) => update("date", e.target.value)} />
+
+      
     </div>
+   
   );
 };
 

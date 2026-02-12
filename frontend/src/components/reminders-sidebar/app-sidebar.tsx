@@ -14,7 +14,10 @@ import {
     SidebarMenuItem,
     SidebarRail,
     SidebarSeparator,
+    SidebarTrigger,
+    useSidebar,
 } from "@/components/ui/sidebar"
+import { Button } from "@/components/ui/button"
 
 // This is sample data.
 const data = {
@@ -46,11 +49,13 @@ interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
 }
 
 export function AppSidebar({ date, setDate, onViewWeek, ...props }: AppSidebarProps) {
+    const { state, setOpen } = useSidebar()
     return (
-        <Sidebar
-            {...props}
-            style={{ "--sidebar-width": "18rem" } as React.CSSProperties}
-            className="
+        <>
+            <Sidebar
+                {...props}
+                style={{ "--sidebar-width": "18rem" } as React.CSSProperties}
+                className="
     h-[370px] 
     top-28 
     left-3
@@ -61,27 +66,48 @@ export function AppSidebar({ date, setDate, onViewWeek, ...props }: AppSidebarPr
     shadow-black/5
     overflow-hidden
   "
-        >
-            <SidebarContent>
+            >
 
-                <DatePicker date={date} setDate={setDate} />
-                <SidebarSeparator className="mx-0" />
-                <SidebarMenuButton onClick={onViewWeek}>
-                    <Plus />
-                    <span className="text-sm font-medium items-center">View My Week</span>
-                </SidebarMenuButton>
-                <SidebarSeparator className="mx-0" />
-                {/* <Calendars calendars={data.calendars} /> */}
+                <SidebarContent>
+                    <DatePicker date={date} setDate={setDate} />
 
-            </SidebarContent>
-            <SidebarFooter>
-                <SidebarMenu>
-                    <SidebarMenuItem>
+                    <SidebarMenuButton onClick={onViewWeek} className="bg-primary text-primary-foreground w-full">
+                        <Plus />
+                        <span className="text-sm font-medium items-center">View My Week</span>
+                    </SidebarMenuButton>
 
-                    </SidebarMenuItem>
-                </SidebarMenu>
-            </SidebarFooter>
-            <SidebarRail />
-        </Sidebar>
+                    {/* <Calendars calendars={data.calendars} /> */}
+
+                </SidebarContent>
+                <SidebarFooter>
+                    <SidebarMenu>
+                        <SidebarMenuItem>
+
+                        </SidebarMenuItem>
+                    </SidebarMenu>
+                </SidebarFooter>
+                <SidebarRail />
+                <div className="absolute bottom-1 right-2 z-50">
+                    <SidebarTrigger className="
+      h-10 w-10
+    rounded-full
+    border
+    bg-background
+    shadow-md
+    hover:shadow-lg
+    transition
+  " />
+                </div>
+            </Sidebar>
+            {state === "collapsed" && (
+                <Button
+
+                    className="fixed left-4 top-24 z-50 mb-4"
+                    onClick={() => setOpen(true)}
+                >
+                    View Calendar
+                </Button>
+            )}
+        </>
     )
 }
