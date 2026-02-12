@@ -6,7 +6,6 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/context/AuthContext";
 import { ReminderProvider } from "@/context/ReminderContext";
 import AppLayout from "@/components/layout/AppLayout";
-import Dashboard from "@/pages/Dashboard";
 import Reminders from "@/pages/Reminders";
 import CalendarView from "@/pages/CalendarView";
 import Profile from "@/pages/Profile";
