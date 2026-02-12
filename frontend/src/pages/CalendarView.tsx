@@ -9,11 +9,16 @@ import { cn } from "@/lib/utils";
 const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
-const CalendarView = () => {
+interface CalendarViewProps {
+  defaultView?: "month" | "week";
+  hideHeader?: boolean;
+}
+
+const CalendarView = ({ defaultView = "month", hideHeader = false }: CalendarViewProps) => {
   const { reminders } = useReminders();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
-  const [view, setView] = useState<"month" | "week">("month");
+  const [view, setView] = useState<"month" | "week">(defaultView);
 
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
@@ -60,16 +65,18 @@ const CalendarView = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold">Calendar</h1>
-          <p className="text-muted-foreground">View reminders on calendar</p>
+      {!hideHeader && (
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-bold">Calendar</h1>
+            <p className="text-muted-foreground">View reminders on calendar</p>
+          </div>
+          <div className="flex gap-2">
+            <Button variant={view === "month" ? "default" : "outline"} size="sm" onClick={() => setView("month")}>Month</Button>
+            <Button variant={view === "week" ? "default" : "outline"} size="sm" onClick={() => setView("week")}>Week</Button>
+          </div>
         </div>
-        <div className="flex gap-2">
-          <Button variant={view === "month" ? "default" : "outline"} size="sm" onClick={() => setView("month")}>Month</Button>
-          <Button variant={view === "week" ? "default" : "outline"} size="sm" onClick={() => setView("week")}>Week</Button>
-        </div>
-      </div>
+      )}
 
       <Card>
         <CardContent className="p-4">

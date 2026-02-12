@@ -24,9 +24,9 @@ import { cn } from "@/lib/utils";
 
 const navItems = [
   { label: "Reminders", icon: ListChecks, path: "/" },
-  { label: "Calendar", icon: CalendarDays, path: "/calendar" },
-  { label: "Profile", icon: User, path: "/profile" },
-  { label: "Settings", icon: Settings, path: "/settings" },
+  // { label: "Calendar", icon: CalendarDays, path: "/calendar" },
+  // { label: "Profile", icon: User, path: "/profile" },
+  // { label: "Settings", icon: Settings, path: "/settings" },
 ];
 
 const Navbar = () => {
