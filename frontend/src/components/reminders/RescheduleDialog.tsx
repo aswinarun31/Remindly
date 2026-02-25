@@ -7,9 +7,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { CalendarClock } from "lucide-react";
+import { CalendarClock, Bell } from "lucide-react";
 import { useReminders } from "@/context/ReminderContext";
 import { useNotifications } from "@/context/NotificationContext";
+import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
 
 interface Props {
@@ -26,6 +27,9 @@ interface Props {
 const RescheduleDialog = ({ open, onOpenChange, reminder }: Props) => {
     const { requestReschedule } = useReminders();
     const { push } = useNotifications();
+    const { user } = useAuth();
+
+    const studentName = user?.name || "A student";
 
     const [proposedDate, setProposedDate] = useState(reminder.date);
     const [proposedTime, setProposedTime] = useState(reminder.time);
@@ -46,11 +50,21 @@ const RescheduleDialog = ({ open, onOpenChange, reminder }: Props) => {
         try {
             await requestReschedule(reminder.id, { proposedDate, proposedTime, reason });
 
-            // Push a notification so the student can see their request status
+            // 1️⃣ Student confirmation notification
             push({
                 type: "reschedule_requested",
                 title: "Reschedule Request Submitted",
                 message: `You requested to reschedule "${reminder.title}" to ${proposedDate} at ${proposedTime}. Awaiting admin approval.`,
+                reminderId: reminder.id,
+            });
+
+            // 2️⃣ Admin-targeted notification (visible when admin is on same client
+            //    or when the admin dashboard loads and checks pending requests)
+            push({
+                type: "reschedule_requested",
+                title: `⚠️ [Admin] Reschedule Request`,
+                message: `${studentName} has requested to reschedule "${reminder.title}" → ${proposedDate} at ${proposedTime}.${reason ? ` Reason: ${reason}` : ""
+                    } — review in Admin Dashboard.`,
                 reminderId: reminder.id,
             });
 

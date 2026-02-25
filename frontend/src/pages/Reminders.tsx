@@ -106,23 +106,25 @@ const Reminders = () => {
       if (isStudent) {
         await addReminder({ ...data, status: "pending" });
       } else {
-        // Admin creates via the admin endpoint (locked, broadcast by default)
         await addReminder(
           { ...data, status: "pending" },
           { asAdmin: true, targetFilter: "all", assignedTo: [] }
         );
       }
+      // Success — close the form
       setFormOpen(false);
+      setPendingFormData(null);
     } catch (err: any) {
       const apiMsg = err?.response?.data;
       if (err?.response?.status === 409 && apiMsg?.overlapping) {
-        // Overlap detected — show conflict dialog
+        // Overlap detected — show conflict dialog (keep pending data to re-fill form)
         setOverlapping(apiMsg.overlapping);
         setPendingFormData(data);
         setFormOpen(false);
         setOverlapOpen(true);
       } else {
         toast.error(apiMsg?.message || "Failed to create reminder");
+        // Don't close the form on generic errors so the user can fix & retry
       }
     }
   };
@@ -131,9 +133,9 @@ const Reminders = () => {
     if (editingReminder) {
       try {
         await updateReminder(editingReminder.id, data);
-        setEditingReminder(null);
+        setEditingReminder(null); // close only on success
       } catch {
-        // error toast handled in context
+        // error toast handled in context; keep form open for retry
       }
     }
   };

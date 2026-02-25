@@ -9,7 +9,8 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Reminder, Priority, Category, NotificationType } from "@/types/reminder";
+import { Reminder } from "@/context/ReminderContext";
+import { Priority, Category, NotificationType } from "@/types/reminder";
 
 const schema = z.object({
   title: z.string().min(1, "Title is required").max(100),
@@ -27,7 +28,7 @@ type FormData = z.infer<typeof schema>;
 interface ReminderFormProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSubmit: (data: FormData) => void;
+  onSubmit: (data: FormData) => void | Promise<void>;
   defaultValues?: Partial<Reminder>;
   mode?: "create" | "edit";
 }
@@ -40,17 +41,16 @@ const ReminderForm = ({ open, onOpenChange, onSubmit, defaultValues, mode = "cre
       description: defaultValues?.description || "",
       date: defaultValues?.date || new Date().toISOString().split("T")[0],
       time: defaultValues?.time || "09:00",
-      priority: defaultValues?.priority || "medium",
-      category: defaultValues?.category || "work",
+      priority: (defaultValues?.priority as Priority) || "medium",
+      category: (defaultValues?.category as Category) || "work",
       recurring: defaultValues?.recurring || false,
-      notificationType: defaultValues?.notificationType || "app",
+      notificationType: (defaultValues?.notificationType as NotificationType) || "app",
     },
   });
 
-  const handleSubmit = (data: FormData) => {
-    onSubmit(data);
-    form.reset();
-    onOpenChange(false);
+  const handleSubmit = async (data: FormData) => {
+    // Let the parent's async onSubmit control closing — don't auto-close here
+    await onSubmit(data);
   };
 
   return (

@@ -1,6 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { userService, reminderService } from "@/services/api";
+import { useNotifications } from "@/context/NotificationContext";
 import { toast } from "sonner";
 import {
     Users, Bell, ShieldCheck, RefreshCw, CheckCircle2, XCircle,
@@ -48,6 +49,9 @@ interface RescheduleReq {
 
 const AdminDashboard = () => {
     const { user } = useAuth();
+    const { push: pushNotification } = useNotifications();
+    const notifiedReqIds = useRef<Set<string>>(new Set());
+
     const [users, setUsers] = useState<UserRecord[]>([]);
     const [requests, setRequests] = useState<RescheduleReq[]>([]);
     const [loadingUsers, setLoadingUsers] = useState(true);
@@ -85,6 +89,22 @@ const AdminDashboard = () => {
         try {
             const data = await reminderService.getAllRescheduleRequests();
             setRequests(data);
+
+            // Push a notification for each NEW pending request the admin hasn't seen yet
+            const pending = (data as RescheduleReq[]).filter((r) => r.status === "pending");
+            pending.forEach((req) => {
+                if (!notifiedReqIds.current.has(req.id)) {
+                    notifiedReqIds.current.add(req.id);
+                    pushNotification({
+                        type: "reschedule_requested",
+                        title: "⚠️ Reschedule Request",
+                        message: `${req.requestedBy?.name} wants to reschedule "${req.reminder?.title
+                            }" → ${req.proposedDate} at ${req.proposedTime}.${req.reason ? ` Reason: "${req.reason}"` : ""
+                            }`,
+                        reminderId: req.reminder?.id,
+                    });
+                }
+            });
         } catch {
             toast.error("Failed to load reschedule requests");
         } finally {
@@ -112,9 +132,19 @@ const AdminDashboard = () => {
     const handleReview = async (requestId: string, status: "approved" | "rejected") => {
         try {
             await reminderService.reviewRescheduleRequest(requestId, status);
+            const req = requests.find((r) => r.id === requestId);
             setRequests((prev) =>
                 prev.map((r) => (r.id === requestId ? { ...r, status } : r))
             );
+            // Notify admin of their own action (confirmation)
+            if (req) {
+                pushNotification({
+                    type: "reschedule_reviewed",
+                    title: `Request ${status === "approved" ? "✅ Approved" : "❌ Rejected"}`,
+                    message: `You ${status} the reschedule request from ${req.requestedBy?.name} for "${req.reminder?.title}".`,
+                    reminderId: req.reminder?.id,
+                });
+            }
             toast.success(`Request ${status}`);
         } catch {
             toast.error("Failed to update request");
