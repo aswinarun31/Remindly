@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, ReactNode, useEffect } from "react";
 import { reminderService } from "@/services/api";
 import { useAuth } from "@/context/AuthContext";
+import { useNotifications } from "@/context/NotificationContext";
 import { toast } from "sonner";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -54,6 +55,7 @@ export const ReminderProvider = ({ children }: { children: ReactNode }) => {
   const [reminders, setReminders] = useState<Reminder[]>([]);
   const [loading, setLoading] = useState(true);
   const { isAuthenticated } = useAuth();
+  const { push: pushNotification } = useNotifications();
 
   const fetchReminders = async () => {
     if (!isAuthenticated) {
@@ -92,6 +94,13 @@ export const ReminderProvider = ({ children }: { children: ReactNode }) => {
         newReminder = await reminderService.studentCreate(data);
       }
       setReminders((prev) => [...prev, newReminder]);
+      // Push notification
+      pushNotification({
+        type: "reminder_created",
+        title: options?.asAdmin ? "Admin Reminder Created" : "Reminder Created",
+        message: `"${newReminder.title}" scheduled for ${newReminder.date} at ${newReminder.time}.`,
+        reminderId: newReminder.id,
+      });
       toast.success("Reminder created!");
     } catch (error: any) {
       // Re-throw so the UI can handle overlap errors specially

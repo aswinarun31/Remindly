@@ -29,12 +29,14 @@ import { cn } from "@/lib/utils";
 const studentNavItems = [
   { label: "Reminders", icon: ListChecks, path: "/" },
   { label: "Calendar", icon: CalendarDays, path: "/calendar" },
+  { label: "Notifications", icon: Bell, path: "/notifications" },
 ];
 
 const adminNavItems = [
   { label: "Reminders", icon: ListChecks, path: "/" },
   { label: "Admin", icon: LayoutDashboard, path: "/admin" },
   { label: "Calendar", icon: CalendarDays, path: "/calendar" },
+  { label: "Notifications", icon: Bell, path: "/notifications" },
 ];
 
 const Navbar = () => {
