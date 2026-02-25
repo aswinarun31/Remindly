@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Bell } from "lucide-react";
+import { Bell, Chrome } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
 
@@ -19,9 +19,10 @@ const schema = z.object({
 }).refine((d) => d.password === d.confirmPassword, { message: "Passwords don't match", path: ["confirmPassword"] });
 
 const Register = () => {
-  const { register: registerUser } = useAuth();
+  const { register: registerUser, loginWithGoogle } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
 
   const form = useForm<z.infer<typeof schema>>({
     resolver: zodResolver(schema),
@@ -34,8 +35,8 @@ const Register = () => {
       await registerUser(data.name, data.email, data.password);
       toast.success("Account created!");
       navigate("/");
-    } catch {
-      toast.error("Registration failed");
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || "Registration failed");
     } finally {
       setLoading(false);
     }
@@ -51,7 +52,22 @@ const Register = () => {
           <CardTitle className="text-2xl">Create account</CardTitle>
           <CardDescription>Get started with Remindly</CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-4">
+          <Button
+            variant="outline"
+            className="w-full gap-2"
+            onClick={() => { setGoogleLoading(true); loginWithGoogle(); }}
+            disabled={googleLoading}
+          >
+            <Chrome className="h-4 w-4" />
+            {googleLoading ? "Redirecting…" : "Continue with Google"}
+          </Button>
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center"><span className="w-full border-t" /></div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-card px-2 text-muted-foreground">or register with email</span>
+            </div>
+          </div>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               <FormField control={form.control} name="name" render={({ field }) => (
