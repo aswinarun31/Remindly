@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/context/AuthContext";
 import { ReminderProvider } from "@/context/ReminderContext";
+import { ThemeProvider } from "@/context/ThemeContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import AppLayout from "@/components/layout/AppLayout";
 
@@ -25,43 +26,45 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <AuthProvider>
-      <ReminderProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <Routes>
-              {/* ── Public routes ───────────────────────────────── */}
-              <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<Register />} />
-              <Route path="/forgot-password" element={<ForgotPassword />} />
-              <Route path="/auth/callback" element={<AuthCallback />} />
-              <Route path="/unauthorized" element={<Unauthorized />} />
+    <ThemeProvider>
+      <AuthProvider>
+        <ReminderProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <Routes>
+                {/* ── Public routes ───────────────────────────────── */}
+                <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Register />} />
+                <Route path="/forgot-password" element={<ForgotPassword />} />
+                <Route path="/auth/callback" element={<AuthCallback />} />
+                <Route path="/unauthorized" element={<Unauthorized />} />
 
-              {/* ── Protected: any authenticated user ──────────── */}
-              <Route element={<ProtectedRoute />}>
-                <Route element={<AppLayout />}>
-                  <Route path="/" element={<Reminders />} />
-                  <Route path="/calendar" element={<CalendarView />} />
-                  <Route path="/profile" element={<Profile />} />
-                  <Route path="/settings" element={<Settings />} />
+                {/* ── Protected: any authenticated user ──────────── */}
+                <Route element={<ProtectedRoute />}>
+                  <Route element={<AppLayout />}>
+                    <Route path="/" element={<Reminders />} />
+                    <Route path="/calendar" element={<CalendarView />} />
+                    <Route path="/profile" element={<Profile />} />
+                    <Route path="/settings" element={<Settings />} />
+                  </Route>
                 </Route>
-              </Route>
 
-              {/* ── Admin-only routes ───────────────────────────── */}
-              <Route element={<ProtectedRoute allowedRoles={["admin"]} />}>
-                <Route element={<AppLayout />}>
-                  <Route path="/admin" element={<AdminDashboard />} />
+                {/* ── Admin-only routes ───────────────────────────── */}
+                <Route element={<ProtectedRoute allowedRoles={["admin"]} />}>
+                  <Route element={<AppLayout />}>
+                    <Route path="/admin" element={<AdminDashboard />} />
+                  </Route>
                 </Route>
-              </Route>
 
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </BrowserRouter>
-        </TooltipProvider>
-      </ReminderProvider>
-    </AuthProvider>
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </BrowserRouter>
+          </TooltipProvider>
+        </ReminderProvider>
+      </AuthProvider>
+    </ThemeProvider>
   </QueryClientProvider>
 );
 

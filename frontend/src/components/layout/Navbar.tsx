@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import NotificationDropdown from "@/components/notifications/NotificationDropdown";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { useAuth } from "@/context/AuthContext";
 import { cn } from "@/lib/utils";
 
@@ -130,6 +131,7 @@ const Navbar = () => {
 
       {/* Right Side Actions */}
       <div className="flex items-center gap-2">
+        <ThemeToggle />
         <NotificationDropdown />
 
         <DropdownMenu>
