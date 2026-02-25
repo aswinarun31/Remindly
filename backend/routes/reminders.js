@@ -2,25 +2,51 @@ const express = require("express");
 const router = express.Router();
 const {
   getReminders,
-  createReminder,
+  adminCreateReminder,
+  studentCreateReminder,
   updateReminder,
   deleteReminder,
-  toggleComplete
+  toggleComplete,
+  requestReschedule,
+  getRescheduleRequests,
+  getMyRescheduleRequests,
+  reviewRescheduleRequest,
 } = require("../controllers/reminderController");
+const { protect, adminOnly, studentOnly } = require("../middleware/auth");
 
-// GET all reminders
+// All reminder routes require authentication
+router.use(protect);
+
+// GET all reminders (filtered by role internally)
 router.get("/", getReminders);
 
-// POST new reminder
-router.post("/", createReminder);
+// Admin creates reminders for students
+router.post("/admin", adminOnly, adminCreateReminder);
 
-// PUT update reminder
+// Student creates personal reminders (with overlap check)
+router.post("/student", studentOnly, studentCreateReminder);
+
+// Update reminder
 router.put("/:id", updateReminder);
 
-// PATCH toggle completion status
+// Delete reminder
+router.delete("/:id", deleteReminder);
+
+// Toggle completion status
 router.patch("/:id/toggle", toggleComplete);
 
-// DELETE reminder
-router.delete("/:id", deleteReminder);
+// ── Reschedule Requests ──────────────────────────
+
+// Student: request rescheduling of an admin reminder
+router.post("/:id/reschedule", studentOnly, requestReschedule);
+
+// Student: view their own reschedule requests
+router.get("/reschedule/mine", studentOnly, getMyRescheduleRequests);
+
+// Admin: view all reschedule requests
+router.get("/reschedule/all", adminOnly, getRescheduleRequests);
+
+// Admin: approve or reject a reschedule request
+router.patch("/reschedule/:requestId/review", adminOnly, reviewRescheduleRequest);
 
 module.exports = router;

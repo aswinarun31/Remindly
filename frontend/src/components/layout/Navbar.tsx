@@ -4,12 +4,15 @@ import {
   Bell,
   CalendarDays,
   ListChecks,
+  LayoutDashboard,
   Menu,
   Settings,
-  User
+  User,
+  Crown,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -22,17 +25,22 @@ import NotificationDropdown from "@/components/notifications/NotificationDropdow
 import { useAuth } from "@/context/AuthContext";
 import { cn } from "@/lib/utils";
 
-const navItems = [
+const studentNavItems = [
   { label: "Reminders", icon: ListChecks, path: "/" },
-  // { label: "Calendar", icon: CalendarDays, path: "/calendar" },
-  // { label: "Profile", icon: User, path: "/profile" },
-  // { label: "Settings", icon: Settings, path: "/settings" },
+  { label: "Calendar", icon: CalendarDays, path: "/calendar" },
+];
+
+const adminNavItems = [
+  { label: "Reminders", icon: ListChecks, path: "/" },
+  { label: "Admin", icon: LayoutDashboard, path: "/admin" },
+  { label: "Calendar", icon: CalendarDays, path: "/calendar" },
 ];
 
 const Navbar = () => {
-  const { user, logout } = useAuth();
+  const { user, logout, isAdmin } = useAuth();
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
+  const navItems = isAdmin ? adminNavItems : studentNavItems;
 
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center border-b bg-card px-4 lg:px-6 relative justify-between">
@@ -128,13 +136,18 @@ const Navbar = () => {
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="flex items-center gap-2 px-2 hover:bg-muted">
               <Avatar className="h-8 w-8">
+                {user?.avatar && <AvatarImage src={user.avatar} alt={user?.name} />}
                 <AvatarFallback className="bg-primary/10 text-sm font-semibold text-primary">
                   {user?.name?.split(" ").map((n) => n[0]).join("") || "U"}
                 </AvatarFallback>
               </Avatar>
-              <span className="hidden text-sm font-medium md:inline-block">
-                {user?.name}
-              </span>
+              <div className="hidden md:flex flex-col items-start">
+                <span className="text-sm font-medium leading-none">{user?.name}</span>
+                <span className="text-xs text-muted-foreground capitalize flex items-center gap-1">
+                  {isAdmin && <Crown className="h-3 w-3 text-amber-500" />}
+                  {user?.role}
+                </span>
+              </div>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56">

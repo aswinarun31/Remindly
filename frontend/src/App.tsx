@@ -5,7 +5,10 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/context/AuthContext";
 import { ReminderProvider } from "@/context/ReminderContext";
+import ProtectedRoute from "@/components/ProtectedRoute";
 import AppLayout from "@/components/layout/AppLayout";
+
+// Pages
 import Reminders from "@/pages/Reminders";
 import CalendarView from "@/pages/CalendarView";
 import Profile from "@/pages/Profile";
@@ -13,7 +16,10 @@ import Settings from "@/pages/Settings";
 import Login from "@/pages/Login";
 import Register from "@/pages/Register";
 import ForgotPassword from "@/pages/ForgotPassword";
+import AuthCallback from "@/pages/AuthCallback";
+import Unauthorized from "@/pages/Unauthorized";
 import NotFound from "@/pages/NotFound";
+import AdminDashboard from "@/pages/AdminDashboard";
 
 const queryClient = new QueryClient();
 
@@ -26,18 +32,28 @@ const App = () => (
           <Sonner />
           <BrowserRouter>
             <Routes>
-              {/* Auth routes */}
+              {/* ── Public routes ───────────────────────────────── */}
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
               <Route path="/forgot-password" element={<ForgotPassword />} />
+              <Route path="/auth/callback" element={<AuthCallback />} />
+              <Route path="/unauthorized" element={<Unauthorized />} />
 
-              {/* App routes with layout */}
-              <Route element={<AppLayout />}>
-                {/* <Route path="/" element={<Dashboard />} /> */}
-                <Route path="/" element={<Reminders />} />
-                <Route path="/calendar" element={<CalendarView />} />
-                <Route path="/profile" element={<Profile />} />
-                <Route path="/settings" element={<Settings />} />
+              {/* ── Protected: any authenticated user ──────────── */}
+              <Route element={<ProtectedRoute />}>
+                <Route element={<AppLayout />}>
+                  <Route path="/" element={<Reminders />} />
+                  <Route path="/calendar" element={<CalendarView />} />
+                  <Route path="/profile" element={<Profile />} />
+                  <Route path="/settings" element={<Settings />} />
+                </Route>
+              </Route>
+
+              {/* ── Admin-only routes ───────────────────────────── */}
+              <Route element={<ProtectedRoute allowedRoles={["admin"]} />}>
+                <Route element={<AppLayout />}>
+                  <Route path="/admin" element={<AdminDashboard />} />
+                </Route>
               </Route>
 
               <Route path="*" element={<NotFound />} />
