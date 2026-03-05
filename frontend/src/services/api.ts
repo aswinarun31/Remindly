@@ -1,50 +1,96 @@
 import axios from "axios";
-import { Reminder } from "@/types/reminder";
-import { mockReminders, mockUser, mockNotifications } from "./mockData";
 
-const api = axios.create({ baseURL: "/api" });
+const api = axios.create({
+  baseURL: "/api",
+});
 
-// Mock API service - replace with real endpoints later
+export default api;
+
+// ── Reminder Service ──────────────────────────────────────────────────────────
+
 export const reminderService = {
-  getAll: async (): Promise<Reminder[]> => {
-    return Promise.resolve([...mockReminders]);
+  getAll: async () => {
+    const res = await api.get("/reminders");
+    return res.data;
   },
-  getById: async (id: string): Promise<Reminder | undefined> => {
-    return Promise.resolve(mockReminders.find((r) => r.id === id));
+
+  // Admin creates reminder for students
+  adminCreate: async (data: Record<string, unknown>) => {
+    const res = await api.post("/reminders/admin", data);
+    return res.data;
   },
-  create: async (data: Omit<Reminder, "id" | "createdAt" | "updatedAt">): Promise<Reminder> => {
-    const newReminder: Reminder = { ...data, id: Date.now().toString(), createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
-    return Promise.resolve(newReminder);
+
+  // Student creates personal reminder (backend checks overlap)
+  studentCreate: async (data: Record<string, unknown>) => {
+    const res = await api.post("/reminders/student", data);
+    return res.data;
   },
-  update: async (id: string, data: Partial<Reminder>): Promise<Reminder> => {
-    const existing = mockReminders.find((r) => r.id === id);
-    return Promise.resolve({ ...existing!, ...data, updatedAt: new Date().toISOString() });
+
+  update: async (id: string, data: Record<string, unknown>) => {
+    const res = await api.put(`/reminders/${id}`, data);
+    return res.data;
   },
-  delete: async (id: string): Promise<void> => {
-    return Promise.resolve();
+
+  delete: async (id: string) => {
+    await api.delete(`/reminders/${id}`);
+  },
+
+  toggleComplete: async (id: string) => {
+    const res = await api.patch(`/reminders/${id}/toggle`);
+    return res.data;
+  },
+
+  // Student: request rescheduling of an admin reminder
+  requestReschedule: async (reminderId: string, data: { proposedDate: string; proposedTime: string; reason?: string }) => {
+    const res = await api.post(`/reminders/${reminderId}/reschedule`, data);
+    return res.data;
+  },
+
+  // Student: get their reschedule requests
+  getMyRescheduleRequests: async () => {
+    const res = await api.get("/reminders/reschedule/mine");
+    return res.data;
+  },
+
+  // Admin: get all reschedule requests
+  getAllRescheduleRequests: async () => {
+    const res = await api.get("/reminders/reschedule/all");
+    return res.data;
+  },
+
+  // Admin: approve or reject a reschedule request
+  reviewRescheduleRequest: async (requestId: string, status: "approved" | "rejected") => {
+    const res = await api.patch(`/reminders/reschedule/${requestId}/review`, { status });
+    return res.data;
   },
 };
+
+// ── Auth Service ──────────────────────────────────────────────────────────────
 
 export const authService = {
   login: async (email: string, password: string) => {
-    return Promise.resolve({ user: mockUser, token: "mock-jwt-token" });
+    const res = await api.post("/auth/login", { email, password });
+    return res.data;
   },
   register: async (name: string, email: string, password: string) => {
-    return Promise.resolve({ user: { ...mockUser, name, email }, token: "mock-jwt-token" });
+    const res = await api.post("/auth/register", { name, email, password });
+    return res.data;
   },
-  forgotPassword: async (email: string) => {
-    return Promise.resolve({ message: "Reset link sent" });
+  getMe: async () => {
+    const res = await api.get("/auth/me");
+    return res.data;
   },
 };
 
-export const notificationService = {
-  getAll: async () => Promise.resolve([...mockNotifications]),
-  markAsRead: async (id: string) => Promise.resolve(),
-};
+// ── User Service (Admin operations) ──────────────────────────────────────────
 
 export const userService = {
-  getProfile: async () => Promise.resolve(mockUser),
-  updateProfile: async (data: Partial<typeof mockUser>) => Promise.resolve({ ...mockUser, ...data }),
+  getAllUsers: async () => {
+    const res = await api.get("/auth/users");
+    return res.data;
+  },
+  updateRole: async (userId: string, role: "admin" | "student") => {
+    const res = await api.patch(`/auth/users/${userId}/role`, { role });
+    return res.data;
+  },
 };
-
-export default api;
